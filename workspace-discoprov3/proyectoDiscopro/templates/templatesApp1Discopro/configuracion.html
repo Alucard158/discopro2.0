@@ -1,0 +1,53 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Configuración{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold text-secondary mb-4">
+    <i class="fas fa-cogs me-2"></i> Configuración del Sistema
+</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <p class="text-muted">
+            Aquí podrás gestionar configuraciones generales del sistema.  
+            (Esta sección puede ampliarse más adelante según sea necesario.)
+        </p>
+
+        <hr>
+
+        <div class="row mt-3">
+            <div class="col-md-6 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="mb-2">
+                        <i class="fas fa-user-shield text-primary me-2"></i>
+                        Seguridad
+                    </h5>
+                    <p class="text-muted small">Opciones relacionadas con la seguridad del usuario.</p>
+                    <a href="{% url 'mi_cuenta' %}" class="btn btn-outline-primary btn-sm">
+                        Administrar Mi Perfil
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="mb-2">
+                        <i class="fas fa-users-cog text-primary me-2"></i>
+                        Gestión de Usuarios
+                    </h5>
+                    <p class="text-muted small">Configura accesos y roles del sistema.</p>
+                    <a href="{% url 'usuario_lista' %}" class="btn btn-outline-primary btn-sm">
+                        Administrar Usuarios
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

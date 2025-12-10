@@ -1,0 +1,147 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Listado de Farmacias{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-clinic-medical me-2"></i> Farmacias
+    </h2>
+
+    <a href="{% url 'farmacia_crear' %}" class="btn btn-primary">
+        <i class="fas fa-plus-circle me-1"></i> Nueva Farmacia
+    </a>
+</div>
+
+<!-- Buscador -->
+<form method="GET" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="q" class="form-control"
+               placeholder="Buscar farmacia..."
+               value="{{ request.GET.q|default:'' }}">
+        <button class="btn btn-primary" type="submit">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+</form>
+
+<!-- Tabla -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+
+                        <!-- ORDEN NOMBRE -->
+                        <th>
+                            <a href="?sort=nombre{% if q %}&q={{ q }}{% endif %}"
+                               class="text-white">
+                                Nombre
+                            </a>
+                        </th>
+
+                        <th>
+                            <a href="?sort=direccion{% if q %}&q={{ q }}{% endif %}"
+                               class="text-white">
+                                Dirección
+                            </a>
+                        </th>
+
+                        <th>
+                            <a href="?sort=comuna{% if q %}&q={{ q }}{% endif %}"
+                               class="text-white">
+                                Comuna
+                            </a>
+                        </th>
+
+                        <th>
+                            <a href="?sort=provincia{% if q %}&q={{ q }}{% endif %}"
+                               class="text-white">
+                                Provincia
+                            </a>
+                        </th>
+
+                        <th>
+                            <a href="?sort=region{% if q %}&q={{ q }}{% endif %}"
+                               class="text-white">
+                                Región
+                            </a>
+                        </th>
+
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for farmacia in farmacias %}
+                    <tr>
+                        <td>{{ farmacia.nombre }}</td>
+                        <td>{{ farmacia.direccion }}</td>
+
+                        <!-- Comuna -->
+                        <td>
+                            {% if farmacia.comuna %}
+                                {{ farmacia.comuna.nombreComuna }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Provincia -->
+                        <td>
+                            {% if farmacia.comuna and farmacia.comuna.provincia %}
+                                {{ farmacia.comuna.provincia.nombreProvincia }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Región -->
+                        <td>
+                            {% if farmacia.comuna and farmacia.comuna.provincia and farmacia.comuna.provincia.region %}
+                                {{ farmacia.comuna.provincia.region.nombreRegion }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            <a href="{% url 'farmacia_detalle' farmacia.pk %}"
+                               class="btn btn-sm btn-info text-white me-1">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <a href="{% url 'farmacia_editar' farmacia.pk %}"
+                               class="btn btn-sm btn-warning text-white me-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                            <a href="{% url 'farmacia_eliminar' farmacia.pk %}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('¿Eliminar esta farmacia?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">
+                            No se encontraron resultados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% include "templatesApp1Discopro/_paginator.html" %}
+
+{% endblock %}

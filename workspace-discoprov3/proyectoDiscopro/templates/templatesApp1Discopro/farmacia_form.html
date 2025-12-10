@@ -1,0 +1,179 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Farmacia{% else %}Nueva Farmacia{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-clinic-medical me-2"></i>
+        {% if form.instance.pk %}Editar Farmacia{% else %}Crear Farmacia{% endif %}
+    </h2>
+
+    <a href="{% url 'farmacia_lista' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Por favor corrige los errores en el formulario.
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- INFORMACIÓN GENERAL -->
+            <fieldset class="mb-3">
+                <legend>Información General</legend>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre *</label>
+                        {{ form.nombre }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Dirección *</label>
+                        {{ form.direccion }}
+                    </div>
+                </div>
+
+                <!-- UBICACIÓN -->
+                <div class="row mb-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Región *</label>
+                        {{ form.region }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Provincia *</label>
+                        {{ form.provincia }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Comuna *</label>
+                        {{ form.comuna }}
+                    </div>
+
+                </div>
+            </fieldset>
+
+            <!-- CONTACTO -->
+            <fieldset class="mb-3">
+                <legend>Contacto y Horarios</legend>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Teléfono *</label>
+                        {{ form.telefono }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Horario Apertura *</label>
+                        {{ form.horario_apertura }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Horario Cierre *</label>
+                        {{ form.horario_cierre }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- GPS -->
+            <fieldset class="mb-3">
+                <legend>Ubicación GPS (Opcional)</legend>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Latitud</label>
+                        {{ form.latitud }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Longitud</label>
+                        {{ form.longitud }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>
+                    {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const region = document.getElementById("id_region");
+    const provincia = document.getElementById("id_provincia");
+    const comuna = document.getElementById("id_comuna");
+
+    function cargarProvincias(regionId) {
+        fetch(`/ajax/provincias/?region=${regionId}`)
+            .then(res => res.json())
+            .then(data => {
+                provincia.innerHTML = '<option value="">---------</option>';
+                comuna.innerHTML = '<option value="">---------</option>';
+
+                data.forEach(p => {
+                    provincia.innerHTML += `<option value="${p.idProvincia}">${p.nombreProvincia}</option>`;
+                });
+            });
+    }
+
+    function cargarComunas(provinciaId) {
+        fetch(`/ajax/comunas/?provincia=${provinciaId}`)
+            .then(res => res.json())
+            .then(data => {
+                comuna.innerHTML = '<option value="">---------</option>';
+
+                data.forEach(c => {
+                    comuna.innerHTML += `<option value="${c.idComuna}">${c.nombreComuna}</option>`;
+                });
+            });
+    }
+
+    // EVENTOS
+    if (region) {
+        region.addEventListener("change", () => {
+            if (region.value) {
+                cargarProvincias(region.value);
+            } else {
+                provincia.innerHTML = '<option value="">---------</option>';
+                comuna.innerHTML = '<option value="">---------</option>';
+            }
+        });
+    }
+
+    if (provincia) {
+        provincia.addEventListener("change", () => {
+            if (provincia.value) {
+                cargarComunas(provincia.value);
+            } else {
+                comuna.innerHTML = '<option value="">---------</option>';
+            }
+        });
+    }
+
+});
+</script>
+{% endblock %}

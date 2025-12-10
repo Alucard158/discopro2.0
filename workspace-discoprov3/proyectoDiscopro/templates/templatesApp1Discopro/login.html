@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - LogiCo</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'staticApp1Discopro/css/custom.css' %}">
+
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--color-fondo);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+        }
+        .login-header {
+            font-weight: 600;
+            color: var(--color-secundario);
+        }
+        .login-icon {
+            font-size: 3rem;
+            color: var(--color-primario);
+        }
+    </style>
+</head>
+<body>
+
+    <main class="login-card">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-4 p-md-5">
+
+                <!-- LOGO -->
+                <div class="text-center mb-4">
+                    <i class="fas fa-shipping-fast login-icon"></i>
+                    <h1 class="h3 login-header mt-2">LogiCo</h1>
+                    <p class="text-muted">Plataforma de Gestión Logística</p>
+                </div>
+
+                <!-- MENSAJES DEL SISTEMA (messages.success / messages.error) -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} text-center p-2" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- ERRORES DEL FORMULARIO -->
+                {% if form.errors %}
+                    <div class="alert alert-danger text-center p-2">
+                        Usuario o contraseña incorrectos. Por favor, intenta de nuevo.
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    <!-- Mantener redirección 'next' si existe -->
+                    {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    {% endif %}
+
+                    <div class="form-floating mb-3">
+                        <input 
+                            type="text" 
+                            name="username" 
+                            class="form-control" 
+                            id="id_username" 
+                            placeholder="usuario o email" 
+                            required 
+                            autofocus
+                            value="{{ form.data.username|default:'' }}"
+                        >
+                        <label for="id_username">Correo Electrónico</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input 
+                            type="password" 
+                            name="password" 
+                            class="form-control" 
+                            id="id_password" 
+                            placeholder="Contraseña" 
+                            required
+                        >
+                        <label for="id_password">Contraseña</label>
+                    </div>
+
+                    <div class="text-end mb-4">
+                        <a href="#" class="small text-muted">¿Olvidaste la contraseña?</a>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Ingresar</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <small class="text-muted">Discopro Ltda. &copy; {% now "Y" %}</small>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

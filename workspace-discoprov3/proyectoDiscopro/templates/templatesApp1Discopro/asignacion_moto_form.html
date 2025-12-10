@@ -1,0 +1,67 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+
+{% block title %}Asignar Moto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-motorcycle"></i> Asignar Moto
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="alert alert-info">
+                <strong>Moto:</strong> {{ moto.patente }} — {{ moto.marca }} {{ moto.modelo }}
+            </div>
+
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <!-- Motorista -->
+                <div class="col-md-6">
+                    <label class="form-label">Motorista</label>
+                    {{ form.motorista }}
+                    {% if form.motorista.errors %}
+                        <div class="text-danger small">{{ form.motorista.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Estado -->
+                <div class="col-md-6">
+                    <label class="form-label">Estado</label>
+                    {{ form.estado }}
+                    {% if form.estado.errors %}
+                        <div class="text-danger small">{{ form.estado.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Fecha de término (opcional) -->
+                <div class="col-md-6">
+                    <label class="form-label">Fecha de Término (opcional)</label>
+                    {{ form.fechaTermino }}
+                    {% if form.fechaTermino.errors %}
+                        <div class="text-danger small">{{ form.fechaTermino.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Botones -->
+                <div class="col-12 d-flex justify-content-between mt-3">
+                    <a href="{% url 'moto_detalle' moto.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Asignación
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Agregar Contacto de Emergencia{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold text-secondary mb-3">
+    <i class="fas fa-user-shield me-2"></i>
+    Nuevo Contacto de Emergencia
+</h2>
+
+<!-- Información del Motorista -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header text-white">
+        Motorista Asociado
+    </div>
+    <div class="card-body">
+        <p><strong>Nombre:</strong> {{ motorista.nombres }} {{ motorista.apellido_paterno }} {{ motorista.apellido_materno }}</p>
+        <p><strong>RUT:</strong> {{ motorista.rut }}</p>
+        <p><strong>Teléfono:</strong> {{ motorista.telefono }}</p>
+    </div>
+</div>
+
+<!-- Formulario del Contacto -->
+<div class="card shadow-sm">
+    <div class="card-header text-white">
+        Datos del Contacto
+    </div>
+
+    <div class="card-body">
+        
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="col-md-6">
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <!-- Botones -->
+            <div class="col-12 d-flex justify-content-end mt-3">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+
+                <a href="{% url 'motorista_detalle' motorista.pk %}" class="btn btn-secondary">
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

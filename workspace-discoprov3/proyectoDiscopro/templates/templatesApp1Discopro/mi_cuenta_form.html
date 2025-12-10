@@ -1,0 +1,87 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Editar Mi Cuenta{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-user-edit me-2"></i> Editar Mi Perfil
+    </h2>
+
+    <a href="{% url 'mi_cuenta' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <!-- ERRORES -->
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                Por favor, corrige los errores en el formulario.
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <fieldset class="mb-3">
+                <legend>Información Personal</legend>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Nombres *</label>
+                        {{ form.first_name }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Apellidos *</label>
+                        {{ form.last_name }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">RUT *</label>
+                        {{ form.rut }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Correo *</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Teléfono</label>
+                        {{ form.telefono }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Rol *</label>
+                        {{ form.rol }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>Estado de la Cuenta</legend>
+                <div class="form-check form-switch">
+                    {{ form.is_active }}
+                    <label class="form-check-label ms-2">Cuenta Activa</label>
+                </div>
+            </fieldset>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

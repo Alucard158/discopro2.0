@@ -1,0 +1,76 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+
+{% block title %}Asignar Farmacia{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow">
+        
+        <!-- HEADER -->
+        <div class="card-header">
+            <h4 class="mb-0">
+                <i class="fas fa-hospital"></i> Asignar Farmacia
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Información del Motorista -->
+            <div class="alert alert-info mb-4">
+                <strong>Motorista:</strong> {{ motorista.nombres }} {{ motorista.apellido_paterno }}<br>
+                <small><strong>RUT:</strong> {{ motorista.rut }}</small>
+            </div>
+
+            <!-- FORMULARIO -->
+            <form method="post">
+                {% csrf_token %}
+
+                <fieldset class="border rounded p-3 mb-4">
+                    <legend class="float-none w-auto px-2">Datos de Asignación</legend>
+
+                    <!-- Farmacia -->
+                    <div class="mb-3">
+                        <label class="form-label">Farmacia</label>
+                        {{ form.farmacia }}
+                        {% if form.farmacia.errors %}
+                            <div class="text-danger small">{{ form.farmacia.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.errors %}
+                            <div class="text-danger small">{{ form.observaciones.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Fecha de término -->
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Término (Opcional)</label>
+                        {{ form.fechaTermino }}
+                        {% if form.fechaTermino.errors %}
+                            <div class="text-danger small">{{ form.fechaTermino.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                </fieldset>
+
+                <!-- BOTONES -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'motorista_detalle' motorista.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Asignación
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

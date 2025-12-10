@@ -1,0 +1,122 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Detalle del Movimiento{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold text-secondary mb-3">
+    <i class="fas fa-route me-2"></i>
+    Despacho #{{ movimiento.numero_despacho }}
+</h2>
+
+<!-- BOTÓN VOLVER -->
+<div class="mb-3">
+    <a href="{% url 'movimiento_lista' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Volver a la Lista
+    </a>
+</div>
+
+<!-- Card: Información general -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header text-white">
+        Información del Despacho
+    </div>
+    <div class="card-body">
+
+        <p><strong>N° Despacho:</strong> {{ movimiento.numero_despacho }}</p>
+        <p><strong>Fecha:</strong> {{ movimiento.fecha_movimiento|date:"d-m-Y H:i" }}</p>
+        <p><strong>Tipo:</strong> {{ movimiento.tipo_movimiento.nombre }}</p>
+        <p><strong>Usuario Responsable:</strong> {{ movimiento.usuario_responsable.username }}</p>
+
+        <p><strong>Motorista Asignado:</strong>
+            {% if movimiento.motorista_asignado %}
+                {{ movimiento.motorista_asignado.nombres }}
+            {% else %}
+                <span class="text-muted">No asignado</span>
+            {% endif %}
+        </p>
+
+        <p><strong>Origen:</strong> {{ movimiento.origen }}</p>
+        <p><strong>Destino:</strong> {{ movimiento.destino }}</p>
+
+        <!-- Estado SIN colores -->
+        <p><strong>Estado:</strong> {{ movimiento.estado }}</p>
+
+        {% if movimiento.observacion %}
+            <p><strong>Observación:</strong><br>{{ movimiento.observacion }}</p>
+        {% endif %}
+
+        <!-- Botón editar únicamente -->
+        <div class="mt-3">
+            <a href="{% url 'movimiento_editar' movimiento.pk %}" class="btn btn-warning text-white">
+                <i class="fas fa-edit"></i> Editar Despacho
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!-- TRAMOS HIJOS -->
+<div class="card shadow-sm">
+    <div class="card-header text-white">
+        Tramos Asociados
+    </div>
+
+    <div class="card-body">
+
+        <!-- Botón para agregar tramo -->
+        <div class="mb-3">
+            <a href="{% url 'tramo_crear' movimiento.pk %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Agregar Tramo
+            </a>
+        </div>
+
+        {% if tramos_hijos %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Origen</th>
+                            <th>Destino</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for tramo in tramos_hijos %}
+                        <tr>
+                            <td>{{ tramo.fecha_movimiento|date:"d-m-Y H:i" }}</td>
+                            <td>{{ tramo.origen }}</td>
+                            <td>{{ tramo.destino }}</td>
+                            <td>{{ tramo.tipo_movimiento.nombre }}</td>
+
+                            <!-- Estado sin colores -->
+                            <td>{{ tramo.estado }}</td>
+
+                            <td class="text-center">
+
+                                <!-- Editar -->
+                                <a href="{% url 'tramo_editar' tramo.pk %}" 
+                                   class="btn btn-sm btn-warning text-white">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <p class="text-muted">Este despacho no tiene tramos registrados.</p>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

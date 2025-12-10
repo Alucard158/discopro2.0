@@ -1,0 +1,138 @@
+{% extends 'templatesApp1Discopro/_base_layout.html' %}
+{% load static %}
+
+{% block title %}Detalle Moto - {{ moto.patente }}{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Detalle de Moto: {{ moto.patente }}</h2>
+
+    <!-- BOTÓN VOLVER -->
+    <div class="mb-3">
+        <a href="{% url 'moto_lista' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a la Lista de Motos
+        </a>
+    </div>
+
+    <!-- Información general -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header text-white">
+            <strong>Información General</strong>
+        </div>
+        <div class="card-body">
+            <p><strong>Patente:</strong> {{ moto.patente }}</p>
+            <p><strong>Marca:</strong> {{ moto.marca }}</p>
+            <p><strong>Modelo:</strong> {{ moto.modelo }}</p>
+            <p><strong>Año:</strong> {{ moto.anio }}</p>
+
+            <a href="{% url 'moto_editar' moto.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar Moto
+            </a>
+        </div>
+    </div>
+
+    <!-- Documentación -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header text-white">
+            <strong>Documentación</strong>
+        </div>
+        <div class="card-body">
+            <p><strong>Año Documento:</strong>
+                {% if moto.documentacion %}
+                    {{ moto.documentacion.anio }}
+                {% else %}
+                    <span class="text-muted">No registrada</span>
+                {% endif %}
+            </p>
+
+            <a href="{% url 'documentacion_moto' moto.pk %}" class="btn btn-primary">
+                <i class="fas fa-file-alt"></i> Ver / Editar Documentación
+            </a>
+        </div>
+    </div>
+
+    <!-- Mantenimientos -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header text-white">
+            <strong>Mantenimientos</strong>
+        </div>
+        <div class="card-body">
+
+            <a href="{% url 'mantenimiento_moto' moto.pk %}" class="btn btn-success mb-3">
+                <i class="fas fa-tools"></i> Registrar Mantenimiento
+            </a>
+
+            <ul class="list-group">
+                {% for m in moto.mantenimientos.all %}
+                    <li class="list-group-item">
+                        <strong>{{ m.fecha_mantenimiento|date:"d-m-Y" }}</strong> — {{ m.descripcion }}
+
+                        {% if m.factura %}
+                            <br>
+                            <a href="{{ m.factura.url }}" target="_blank"
+                               class="btn btn-sm btn-outline-primary mt-2">
+                                📄 Ver Comprobante
+                            </a>
+                        {% else %}
+                            <br>
+                            <span class="text-muted">Sin comprobante adjunto</span>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">
+                        No hay mantenimientos registrados.
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- ASIGNACIÓN DE MOTORISTA -->
+    <div class="card shadow-sm">
+        <div class="card-header text-white">
+            <strong>Asignaciones de Motorista</strong>
+        </div>
+        <div class="card-body">
+
+            <a href="{% url 'asignar_moto' moto.pk %}" class="btn btn-primary mb-3">
+                <i class="fas fa-user-plus"></i> Asignar Moto a Motorista
+            </a>
+
+            <p><strong>Motorista Actual:</strong>
+                {% with ultima=moto.asignacionmoto_set.last %}
+                    {% if ultima and not ultima.fechaTermino %}
+                        {{ ultima.motorista }}
+                    {% else %}
+                        <span class="text-muted">Sin asignar</span>
+                    {% endif %}
+                {% endwith %}
+            </p>
+
+            <h5 class="mt-4">Historial de asignaciones:</h5>
+            <ul class="list-group">
+                {% for asignacion in moto.asignacionmoto_set.all %}
+                    <li class="list-group-item">
+                        <strong>{{ asignacion.motorista }}</strong><br>
+                        Asignado el: {{ asignacion.fechaAsignacion|date:"d-m-Y H:i" }}
+
+                        {% if asignacion.fechaTermino %}
+                            <br><small class="text-muted">
+                                Terminó: {{ asignacion.fechaTermino|date:"d-m-Y" }}
+                            </small>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">
+                        No hay asignaciones anteriores.
+                    </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

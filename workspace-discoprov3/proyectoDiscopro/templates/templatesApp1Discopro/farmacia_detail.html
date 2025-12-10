@@ -1,0 +1,63 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Detalle de Farmacia{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-clinic-medical me-2"></i> Detalle de Farmacia
+    </h2>
+
+    <div>
+        <a href="{% url 'farmacia_editar' farmacia.pk %}" class="btn btn-warning text-white me-2">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+
+        <a href="{% url 'farmacia_eliminar' farmacia.pk %}" 
+           class="btn btn-danger"
+           onclick="return confirm('¿Deseas eliminar esta farmacia?');">
+            <i class="fas fa-trash"></i>
+        </a>
+    </div>
+</div>
+
+<a href="{% url 'farmacia_lista' %}" class="btn btn-secondary mb-3">
+    <i class="fas fa-arrow-left"></i> Volver al listado
+</a>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <h4 class="text-primary mb-3">{{ farmacia.nombre }}</h4>
+
+        <div class="row mb-3">
+
+            <div class="col-md-6">
+                <p><strong>Dirección:</strong><br>{{ farmacia.direccion }}</p>
+                <p><strong>Teléfono:</strong><br>{{ farmacia.telefono }}</p>
+                <p><strong>Horario:</strong><br>
+                    Apertura: {{ farmacia.horario_apertura }} <br>
+                    Cierre: {{ farmacia.horario_cierre }}
+                </p>
+            </div>
+
+            <div class="col-md-6">
+                <p><strong>Región:</strong><br>{{ farmacia.comuna.provincia.region.nombreRegion }}</p>
+                <p><strong>Provincia:</strong><br>{{ farmacia.comuna.provincia.nombreProvincia }}</p>
+                <p><strong>Comuna:</strong><br>{{ farmacia.comuna.nombreComuna }}</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h5 class="text-secondary">Ubicación GPS (Opcional)</h5>
+
+        <p><strong>Latitud:</strong> {{ farmacia.latitud|default:"—" }}</p>
+        <p><strong>Longitud:</strong> {{ farmacia.longitud|default:"—" }}</p>
+
+    </div>
+</div>
+
+{% endblock %}

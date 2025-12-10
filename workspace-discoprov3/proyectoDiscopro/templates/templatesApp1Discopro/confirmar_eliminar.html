@@ -1,0 +1,42 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+
+{% block title %}Confirmar Eliminación{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center">
+    <div class="card shadow-sm" style="max-width: 600px; width: 100%;">
+        <div class="card-header bg-danger text-white text-center">
+            <h4 class="mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Confirmar Eliminación
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <p class="lead text-center">
+                ¿Estás seguro que deseas eliminar este registro?
+            </p>
+
+            <p class="text-center text-muted">
+                <strong>Objeto:</strong> {{ object }}
+            </p>
+
+            <form method="post" class="text-center">
+                {% csrf_token %}
+                
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Sí, eliminar
+                </button>
+
+                <a href="javascript:history.back()" class="btn btn-secondary ms-3">
+                    <i class="fas fa-arrow-left"></i> Cancelar
+                </a>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

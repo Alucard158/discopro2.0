@@ -1,0 +1,107 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Listado de Motos{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-motorcycle me-2"></i> Motos Registradas
+    </h2>
+
+    <a href="{% url 'moto_crear' %}" class="btn btn-primary">
+        <i class="fas fa-plus-circle"></i> Nueva Moto
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <!-- BUSCADOR -->
+        <form method="get" class="mb-3">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="q" 
+                    class="form-control" 
+                    placeholder="Buscar por patente, marca, modelo o motorista..."
+                    value="{{ request.GET.q|default:'' }}"
+                >
+                <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
+
+        <!-- TABLA -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th><a href="?sort=patente" class="text-white">Patente</a></th>
+                        <th><a href="?sort=marca" class="text-white">Marca</a></th>
+                        <th><a href="?sort=modelo" class="text-white">Modelo</a></th>
+                        <th><a href="?sort=anio" class="text-white">Año</a></th>
+                        <th><a href="?sort=propietario" class="text-white">Propietario</a></th>
+                        <th><a href="?sort=motorista" class="text-white">Motorista Asignado</a></th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for moto in motos %}
+                    <tr>
+                        <td>{{ moto.patente }}</td>
+                        <td>{{ moto.marca }}</td>
+                        <td>{{ moto.modelo }}</td>
+                        <td>{{ moto.anio }}</td>
+                        <td>{{ moto.get_propietario_display }}</td>
+
+                        <!-- Motorista actual -->
+                        <td>
+                            {% if moto.motorista_actual %}
+                                {{ moto.motorista_actual }}
+                            {% else %}
+                                <span class="text-muted">Sin asignar</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- ACCIONES -->
+                        <td class="text-center">
+
+                            <!-- Ver -->
+                            <a href="{% url 'moto_detalle' moto.patente %}" 
+                               class="btn btn-sm btn-info text-white me-1">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <!-- Editar -->
+                            <a href="{% url 'moto_editar' moto.patente %}" 
+                               class="btn btn-sm btn-warning text-white me-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                            <!-- Eliminar -->
+                            <a href="{% url 'moto_eliminar' moto.patente %}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('¿Deseas eliminar esta moto?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            No hay motos registradas.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "templatesApp1Discopro/_paginator.html" %}
+
+    </div>
+</div>
+
+{% endblock %}

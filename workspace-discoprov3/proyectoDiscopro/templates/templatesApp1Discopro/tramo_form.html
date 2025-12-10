@@ -1,0 +1,145 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Editar Tramo
+    {% else %}
+        Crear Tramo
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-3">
+
+    <h2 class="fw-bold text-secondary mb-3">
+        <i class="fas fa-route me-2"></i>
+        {% if form.instance.pk %}
+            Editar Tramo
+        {% else %}
+            Crear Nuevo Tramo
+        {% endif %}
+    </h2>
+
+    <!-- =============================================== -->
+    <!-- RESOLVER URL VOLVER (FUNCIONA EN CREATE Y UPDATE) -->
+    <!-- =============================================== -->
+    {% if movimiento_padre %}
+        {% url 'movimiento_detalle' movimiento_padre.pk as volver_url %}
+    {% else %}
+        {% url 'movimiento_detalle' form.instance.movimiento_padre.pk as volver_url %}
+    {% endif %}
+
+    <!-- BOTÓN VOLVER -->
+    <div class="mb-3">
+        <a href="{{ volver_url }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al Despacho
+        </a>
+    </div>
+
+    <!-- =============================================== -->
+    <!--   INFORMACIÓN DEL DESPACHO PADRE (RESUMEN)      -->
+    <!-- =============================================== -->
+    {% if movimiento_padre %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <strong>Información del Despacho</strong>
+        </div>
+        <div class="card-body">
+
+            <p><strong>ID Despacho:</strong> {{ movimiento_padre.numero_despacho }}</p>
+
+            <p><strong>Usuario Responsable:</strong>
+                {{ movimiento_padre.usuario_responsable }}
+            </p>
+
+            <p><strong>Motorista Asignado:</strong>
+                {% if movimiento_padre.motorista_asignado %}
+                    {{ movimiento_padre.motorista_asignado }}
+                {% else %}
+                    <span class="text-muted">No asignado</span>
+                {% endif %}
+            </p>
+
+            <p><strong>Origen:</strong> {{ movimiento_padre.origen }}</p>
+
+            <p><strong>Destino:</strong> {{ movimiento_padre.destino }}</p>
+
+            <p><strong>Estado:</strong> {{ movimiento_padre.estado }}</p>
+
+            {% if movimiento_padre.observacion %}
+                <p><strong>Observación:</strong> {{ movimiento_padre.observacion }}</p>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- =============================================== -->
+    <!--     ERRORES DEL FORMULARIO                       -->
+    <!-- =============================================== -->
+
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Corrige los errores para continuar:</strong>
+            <ul class="mb-0">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- =============================================== -->
+    <!--      FORMULARIO DEL TRAMO                        -->
+    <!-- =============================================== -->
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div class="col-md-6">
+
+                        {% if not field.is_hidden %}
+                            <label class="form-label fw-semibold">{{ field.label }}</label>
+                        {% endif %}
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small class="text-muted d-block">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="col-12 d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+
+                    <a href="{{ volver_url }}" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

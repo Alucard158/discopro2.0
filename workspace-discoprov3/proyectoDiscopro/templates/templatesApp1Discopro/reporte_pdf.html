@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        h1, h2, h3 { color: #003366; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 6px;
+            text-align: left;
+        }
+        th {
+            background: #003366;
+            color: #fff;
+        }
+        .section-title {
+            background: #009a44;
+            color: white;
+            padding: 6px 10px;
+            font-size: 14px;
+            margin-top: 18px;
+        }
+        .small { font-size: 11px; }
+    </style>
+</head>
+<body>
+
+<h1>{{ titulo }}</h1>
+
+<p class="small">
+    <strong>Fecha de impresión:</strong> {{ fecha_impresion|date:"d-m-Y H:i" }}<br>
+    <strong>Generado por:</strong> {{ usuario.get_full_name }} ({{ usuario.username }})
+</p>
+
+<!-- Resumen estadístico -->
+<h2>Resumen General</h2>
+<table>
+    <thead>
+        <tr>
+            {% for col in data.columnas %}
+                <th>{{ col }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for fila in data.detalles %}
+            <tr>
+                {% for key, value in fila.items %}
+                    {% if not key == "mes" %}
+                        <td>{{ value }}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" style="text-align: center;">Sin datos</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Total movimientos registrados: {{ total_general }}</h3>
+
+<!-- MOVIMIENTOS COMPLETADOS -->
+<div class="section-title">Movimientos Completados</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>N° Despacho</th>
+            <th>Tipo</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Motorista</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for m in movimientos_completados %}
+        <tr>
+            <td>{{ m.id_movimiento }}</td>
+            <td>{{ m.numero_despacho }}</td>
+            <td>{{ m.tipo_movimiento.nombre }}</td>
+            <td>{{ m.origen }}</td>
+            <td>{{ m.destino }}</td>
+            <td>{{ m.motorista_asignado.nombres|default:"-" }}</td>
+            <td>{{ m.fecha_movimiento|date:"d-m-Y H:i" }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7" style="text-align:center;">Sin completados</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- MOVIMIENTOS PENDIENTES -->
+<div class="section-title">Movimientos Pendientes</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>N° Despacho</th>
+            <th>Tipo</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Motorista</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for m in movimientos_pendientes %}
+        <tr>
+            <td>{{ m.id_movimiento }}</td>
+            <td>{{ m.numero_despacho }}</td>
+            <td>{{ m.tipo_movimiento.nombre }}</td>
+            <td>{{ m.origen }}</td>
+            <td>{{ m.destino }}</td>
+            <td>{{ m.motorista_asignado.nombres|default:"-" }}</td>
+            <td>{{ m.fecha_movimiento|date:"d-m-Y H:i" }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7" style="text-align:center;">Sin pendientes</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- MOVIMIENTOS ANULADOS -->
+<div class="section-title">Movimientos Anulados</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>N° Despacho</th>
+            <th>Tipo</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Motorista</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for m in movimientos_anulados %}
+        <tr>
+            <td>{{ m.id_movimiento }}</td>
+            <td>{{ m.numero_despacho }}</td>
+            <td>{{ m.tipo_movimiento.nombre }}</td>
+            <td>{{ m.origen }}</td>
+            <td>{{ m.destino }}</td>
+            <td>{{ m.motorista_asignado.nombres|default:"-" }}</td>
+            <td>{{ m.fecha_movimiento|date:"d-m-Y H:i" }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7" style="text-align:center;">Sin anulados</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

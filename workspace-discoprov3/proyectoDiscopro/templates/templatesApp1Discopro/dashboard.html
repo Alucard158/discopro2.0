@@ -1,0 +1,76 @@
+{% extends 'templatesApp1Discopro/_base_layout.html' %}
+{% load static %}
+
+{% block title %}Dashboard - LogiCo{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+
+    <!-- FARMACIAS -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white">
+                <i class="fas fa-clinic-medical me-2"></i> Farmacias Registradas
+            </div>
+            <div class="card-body text-center">
+                <h2 class="display-5">{{ total_farmacias }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOTORISTAS -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white">
+                <i class="fas fa-motorcycle me-2"></i> Motoristas Activos
+            </div>
+            <div class="card-body text-center">
+                <h2 class="display-5">{{ total_motoristas }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOTOS -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white">
+                <i class="fas fa-motorcycle me-2"></i> Motos Registradas
+            </div>
+            <div class="card-body text-center">
+                <h2 class="display-5">{{ total_motos }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4 mt-4">
+
+    <!-- USUARIOS -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header text-white">
+                <i class="fas fa-users me-2"></i> Usuarios Totales
+            </div>
+            <div class="card-body text-center">
+                <h2 class="display-5">{{ total_usuarios }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOVIMIENTOS -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header text-white">
+                <i class="fas fa-shipping-fast me-2"></i> Movimientos del Día
+            </div>
+            <div class="card-body text-center">
+                <h2 class="display-5">{{ total_movimientos }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

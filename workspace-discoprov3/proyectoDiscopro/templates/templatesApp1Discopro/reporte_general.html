@@ -1,0 +1,105 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %} Reporte General {% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4 text-secondary">
+    <i class="fas fa-chart-bar me-2"></i> Reporte General de Movimientos
+</h2>
+
+<!-- Resumen Diario -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        Resumen Diario
+    </div>
+    <div class="card-body">
+        <p><strong>Total movimientos hoy:</strong> {{ total_hoy }}</p>
+
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Estado</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for est in estados_hoy %}
+                <tr>
+                    <td>{{ est.estado|title }}</td>
+                    <td>{{ est.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted">Sin datos</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Resumen Mensual -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        Resumen Mensual
+    </div>
+    <div class="card-body">
+        <p><strong>Total movimientos en el mes:</strong> {{ total_mes }}</p>
+
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Tipo de Movimiento</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tipos_mes %}
+                <tr>
+                    <td>{{ t.tipo_movimiento__nombre }}</td>
+                    <td>{{ t.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted">Sin datos</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Resumen Anual -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        Resumen Anual
+    </div>
+    <div class="card-body">
+        <p><strong>Total completados este año:</strong> {{ total_anio }}</p>
+
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mes</th>
+                    <th>Completados</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in evolucion_anual %}
+                <tr>
+                    <td>{{ fila.mes|date:"F Y" }}</td>
+                    <td>{{ fila.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted">Sin datos</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

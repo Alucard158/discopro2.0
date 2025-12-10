@@ -1,0 +1,108 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Listado de Movimientos{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-route me-2"></i> Movimientos (Despachos)
+    </h2>
+
+    <a href="{% url 'movimiento_crear' %}" class="btn btn-primary">
+        <i class="fas fa-plus-circle"></i> Nuevo Despacho
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <!-- BUSCADOR -->
+        <form method="get" class="mb-3">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="q" 
+                    class="form-control"
+                    placeholder="Buscar por N° despacho, origen, destino o motorista..." 
+                    value="{{ request.GET.q|default:'' }}"
+                >
+                <button class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- TABLA -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>N° Despacho</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Tipo</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Motorista</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for mov in movimientos %}
+                    <tr>
+                        <td>{{ mov.numero_despacho }}</td>
+                        <td>{{ mov.fecha_movimiento|date:"d-m-Y H:i" }}</td>
+
+                        <!-- Estado sin colores -->
+                        <td>{{ mov.estado }}</td>
+
+                        <td>{{ mov.tipo_movimiento.nombre }}</td>
+                        <td>{{ mov.origen }}</td>
+                        <td>{{ mov.destino }}</td>
+
+                        <td>
+                            {% if mov.motorista_asignado %}
+                                {{ mov.motorista_asignado.nombres }}
+                            {% else %}
+                                <span class="text-muted">Sin motorista</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+
+                            <!-- Ver -->
+                            <a href="{% url 'movimiento_detalle' mov.pk %}" 
+                               class="btn btn-sm btn-info text-white me-1">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <!-- Editar -->
+                            <a href="{% url 'movimiento_editar' mov.pk %}" 
+                               class="btn btn-sm btn-warning text-white">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">
+                            No se encontraron movimientos registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% include "templatesApp1Discopro/_paginator.html" %}
+
+    </div>
+</div>
+
+{% endblock %}

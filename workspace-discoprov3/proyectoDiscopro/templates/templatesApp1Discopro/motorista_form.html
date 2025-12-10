@@ -1,0 +1,204 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Editar Motorista{% else %}Nuevo Motorista{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-motorcycle me-2"></i>
+        {% if object %}Editar Motorista{% else %}Registrar Motorista{% endif %}
+    </h2>
+
+    <a href="{% url 'motorista_lista' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <fieldset>
+                <legend>Datos Personales</legend>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">RUT</label>
+                        {{ form.rut }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Pasaporte</label>
+                        {{ form.pasaporte }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Fecha de Nacimiento</label>
+                        {{ form.fecha_nacimiento }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Nombres</label>
+                        {{ form.nombres }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Apellido Paterno</label>
+                        {{ form.apellido_paterno }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Apellido Materno</label>
+                        {{ form.apellido_materno }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Ubicación</legend>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Región</label>
+                        {{ form.region }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Provincia</label>
+                        {{ form.provincia }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Comuna</label>
+                        {{ form.comuna }}
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Dirección</label>
+                        {{ form.direccion }}
+                    </div>
+
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Contacto</legend>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Correo</label>
+                        {{ form.correo }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Teléfono</label>
+                        {{ form.telefono }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Documentación</legend>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Incluye Moto Personal</label>
+                        <div class="form-check">
+                            {{ form.incluye_moto_personal }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Licencia de Conducir</label>
+                        {{ form.licencia_conducir }}
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Estado</label>
+                        {{ form.estado }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Último Control</label>
+                        {{ form.fecha_ultimo_control }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Próximo Control</label>
+                        {{ form.fecha_proximo_control }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="text-end mt-4">
+                <button class="btn btn-primary btn-lg">
+                    <i class="fas fa-save me-1"></i>
+                    {% if object %}Guardar Cambios{% else %}Registrar Motorista{% endif %}
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================
+// Carga dinámica Region → Provincia → Comuna
+// ============================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const regionSelect = document.getElementById("id_region");
+    const provinciaSelect = document.getElementById("id_provincia");
+    const comunaSelect = document.getElementById("id_comuna");
+
+    function cargarProvincias(regionId) {
+        fetch(`/load-provincias/?region=${regionId}`)
+            .then(res => res.json())
+            .then(data => {
+                provinciaSelect.innerHTML = '<option value="">---------</option>';
+                comunaSelect.innerHTML = '<option value="">---------</option>';
+
+                data.forEach(p => {
+                    provinciaSelect.innerHTML += `<option value="${p.idProvincia}">${p.nombreProvincia}</option>`;
+                });
+            });
+    }
+
+    function cargarComunas(provinciaId) {
+        fetch(`/load-comunas/?provincia=${provinciaId}`)
+            .then(res => res.json())
+            .then(data => {
+                comunaSelect.innerHTML = '<option value="">---------</option>';
+                data.forEach(c => {
+                    comunaSelect.innerHTML += `<option value="${c.idComuna}">${c.nombreComuna}</option>`;
+                });
+            });
+    }
+
+    regionSelect.addEventListener("change", () => {
+        if (regionSelect.value) {
+            cargarProvincias(regionSelect.value);
+        }
+    });
+
+    provinciaSelect.addEventListener("change", () => {
+        if (provinciaSelect.value) {
+            cargarComunas(provinciaSelect.value);
+        }
+    });
+
+});
+</script>
+{% endblock %}

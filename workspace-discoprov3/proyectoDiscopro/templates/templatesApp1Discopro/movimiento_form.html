@@ -1,0 +1,70 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Editar Movimiento
+    {% else %}
+        Nuevo Movimiento
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-route me-2"></i>
+        {% if form.instance.pk %}Editar Movimiento{% else %}Nuevo Movimiento{% endif %}
+    </h2>
+
+    <a href="{% url 'movimiento_lista' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <!-- ERRORES GENERALES DEL FORM -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="row g-3">
+            {% csrf_token %}
+
+            <!-- FIELDS -->
+            {% for field in form %}
+                <div class="{% if field.name == 'observacion' %}col-12{% else %}col-md-6{% endif %}">
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <!-- BOTONES -->
+            <div class="col-12 d-flex justify-content-end mt-3">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+
+                <a href="{% url 'movimiento_lista' %}" class="btn btn-secondary">
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

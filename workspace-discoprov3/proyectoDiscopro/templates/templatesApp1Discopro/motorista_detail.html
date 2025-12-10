@@ -1,0 +1,197 @@
+{% extends "templatesApp1Discopro/_base_layout.html" %}
+{% load static %}
+
+{% block title %}Detalle del Motorista{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-secondary">
+        <i class="fas fa-id-card me-2"></i> Detalle del Motorista
+    </h2>
+
+    <div>
+        <a href="{% url 'motorista_editar' motorista.pk %}" class="btn btn-warning text-white me-2">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+
+        <a href="{% url 'motorista_eliminar' motorista.pk %}"
+           class="btn btn-danger"
+           onclick="return confirm('¿Deseas eliminar este motorista?');">
+           <i class="fas fa-trash"></i> Eliminar
+        </a>
+    </div>
+</div>
+
+<a href="{% url 'motorista_lista' %}" class="btn btn-secondary mb-3">
+    <i class="fas fa-arrow-left"></i> Volver al listado
+</a>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <h4 class="text-primary mb-3">{{ motorista.nombres }} {{ motorista.apellido_paterno }} {{ motorista.apellido_materno }}</h4>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <p><strong>RUT:</strong><br>{{ motorista.rut }}</p>
+                <p><strong>Teléfono:</strong><br>{{ motorista.telefono }}</p>
+                <p><strong>Correo:</strong><br>{{ motorista.correo }}</p>
+            </div>
+
+            <div class="col-md-4">
+                <p><strong>Dirección:</strong><br>{{ motorista.direccion }}</p>
+                <p><strong>Comuna:</strong><br>{{ motorista.comuna.nombreComuna }}</p>
+                <p><strong>Estado:</strong><br>
+                    {% if motorista.estado == 'activo' %}
+                        <span class="badge bg-success">Activo</span>
+                    {% elif motorista.estado == 'inactivo' %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Licencia Médica</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="col-md-4">
+                <p><strong>Incluye Moto Personal:</strong><br>
+                    {% if motorista.incluye_moto_personal %}
+                        Sí
+                    {% else %}
+                        No
+                    {% endif %}
+                </p>
+
+                <p><strong>Fecha último control:</strong><br>{{ motorista.fecha_ultimo_control|default:"—" }}</p>
+                <p><strong>Fecha próximo control:</strong><br>{{ motorista.fecha_proximo_control|default:"—" }}</p>
+
+                <!-- NUEVO: LICENCIA DE CONDUCIR -->
+                <p><strong>Licencia de Conducir:</strong><br>
+                    {% if motorista.licencia_conducir %}
+                        <a href="{{ motorista.licencia_conducir.url }}"
+                           target="_blank"
+                           class="btn btn-sm btn-outline-primary mt-2">
+                            📄 Ver Licencia
+                        </a>
+                    {% else %}
+                        <span class="text-muted">No adjunta</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ASIGNACIONES DE FARMACIAS -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="text-secondary">Asignaciones de Farmacias</h5>
+            <a href="{% url 'asignar_farmacia' motorista.pk %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Asignar Farmacia
+            </a>
+        </div>
+
+        <table class="table table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Farmacia</th>
+                    <th>Fecha Asignación</th>
+                    <th>Fecha Término</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asignacion in asignaciones_farmacia %}
+                <tr>
+                    <td>{{ asignacion.farmacia.nombre }}</td>
+                    <td>{{ asignacion.fechaAsignacion|date:"d/m/Y H:i" }}</td>
+                    <td>{{ asignacion.fechaTermino|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Sin asignaciones.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- ASIGNACIONES DE MOTOS -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="text-secondary">Asignaciones de Moto</h5>
+        </div>
+
+        <table class="table table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Moto</th>
+                    <th>Fecha Asignación</th>
+                    <th>Estado</th>
+                    <th>Fecha Término</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asignacion in asignaciones_moto %}
+                <tr>
+                    <td>{{ asignacion.moto.patente }}</td>
+                    <td>{{ asignacion.fechaAsignacion|date:"d/m/Y H:i" }}</td>
+                    <td>{{ asignacion.estado }}</td>
+                    <td>{{ asignacion.fechaTermino|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center text-muted">Sin asignaciones.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- CONTACTOS DE EMERGENCIA -->
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="text-secondary">Contactos de Emergencia</h5>
+            <a href="{% url 'contacto_emergencia_crear' motorista.pk %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Nuevo Contacto
+            </a>
+        </div>
+
+        <table class="table table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Parentesco</th>
+                    <th>Teléfono</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contacto in contactos %}
+                <tr>
+                    <td>{{ contacto.nombreCompleto }}</td>
+                    <td>{{ contacto.parentesco }}</td>
+                    <td>{{ contacto.telefono }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'contacto_emergencia_eliminar' contacto.pk %}" 
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('¿Eliminar contacto?');">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center text-muted">Sin contactos registrados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}
