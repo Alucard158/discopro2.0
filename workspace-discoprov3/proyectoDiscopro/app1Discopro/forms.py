@@ -164,12 +164,14 @@ class UsuarioUpdateForm(forms.ModelForm):
 
 # --- FORMULARIOS MODULOS ---
 class FarmaciaForm(forms.ModelForm):
+    # Campos auxiliares (NO existen en el modelo)
     region = forms.ModelChoiceField(
         queryset=Region.objects.all(),
         label="Región",
         widget=forms.Select(attrs={'class': 'form-select'}),
         required=True
     )
+
     provincia = forms.ModelChoiceField(
         queryset=Provincia.objects.none(),
         label="Provincia",
@@ -180,17 +182,39 @@ class FarmaciaForm(forms.ModelForm):
     class Meta:
         model = Farmacia
         fields = [
-            'nombre', 'direccion', 'region', 'provincia', 'comuna',
-            'horario_apertura', 'horario_cierre', 'telefono',
-            'latitud', 'longitud'
+            'nombre', 'direccion',
+            'region', 'provincia', 'comuna',
+            'horario_apertura', 'horario_cierre',
+            'telefono', 'latitud', 'longitud'
         ]
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
-            'direccion': forms.TextInput(attrs={'class': 'form-control'}),
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Farmacia Cruz Verde Centro'
+            }),
+            'direccion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Av. 21 de Mayo 123'
+            }),
             'comuna': forms.Select(attrs={'class': 'form-select'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
-            'latitud': forms.NumberInput(attrs={'class': 'form-control'}),
-            'longitud': forms.NumberInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: +56 9 1234 5678'
+            }),
+            'latitud': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: -18.478250',
+                'step': '0.000001',
+                'min': '-90',
+                'max': '90'
+            }),
+            'longitud': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: -70.312580',
+                'step': '0.000001',
+                'min': '-180',
+                'max': '180'
+            }),
             'horario_apertura': NativeTimeInput(),
             'horario_cierre': NativeTimeInput(),
         }
@@ -198,10 +222,10 @@ class FarmaciaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Por defecto no mostramos comunas
+        # Inicialmente no cargamos comunas
         self.fields['comuna'].queryset = Comuna.objects.none()
 
-        # 1) Si viene región en POST/GET → cargar provincias
+        # ========= PROVINCIAS SEGÚN REGIÓN =========
         if 'region' in self.data:
             try:
                 region_id = int(self.data.get('region'))
@@ -210,7 +234,7 @@ class FarmaciaForm(forms.ModelForm):
                 ).order_by('nombreProvincia')
             except (ValueError, TypeError):
                 pass
-        # 2) Si NO viene en data pero estamos editando
+
         elif self.instance.pk and self.instance.comuna:
             region = self.instance.comuna.provincia.region
             self.fields['provincia'].queryset = Provincia.objects.filter(
@@ -219,7 +243,7 @@ class FarmaciaForm(forms.ModelForm):
             self.initial['region'] = region
             self.initial['provincia'] = self.instance.comuna.provincia
 
-        # 3) Comunas según provincia
+        # ========= COMUNAS SEGÚN PROVINCIA =========
         if 'provincia' in self.data:
             try:
                 provincia_id = int(self.data.get('provincia'))
@@ -228,6 +252,7 @@ class FarmaciaForm(forms.ModelForm):
                 ).order_by('nombreComuna')
             except (ValueError, TypeError):
                 pass
+
         elif self.instance.pk and self.instance.comuna:
             provincia = self.instance.comuna.provincia
             self.fields['comuna'].queryset = Comuna.objects.filter(
@@ -242,8 +267,9 @@ class MotoristaForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'}),
         required=False
     )
+
     provincia = forms.ModelChoiceField(
-        queryset=Provincia.objects.none(),
+        queryset=Provincia.objects.all(),
         label="Provincia",
         widget=forms.Select(attrs={'class': 'form-select'}),
         required=False
@@ -252,63 +278,25 @@ class MotoristaForm(forms.ModelForm):
     class Meta:
         model = Motorista
         fields = [
-            'codigo',
             'rut', 'pasaporte', 'nombres', 'apellido_paterno', 'apellido_materno',
-            'fecha_nacimiento', 
-            'region', 'provincia', 
-            'comuna', 'direccion', 
+            'fecha_nacimiento',
+            'region', 'provincia',
+            'comuna', 'direccion',
             'telefono', 'correo',
             'incluye_moto_personal',
             'estado',
-            'licencia_conducir', 'fecha_ultimo_control', 'fecha_proximo_control'
+            'licencia_conducir',
+            'fecha_ultimo_control', 'fecha_proximo_control'
         ]
         widgets = {
-            'rut': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 12.345.678-9'}),
-            'pasaporte': forms.TextInput(attrs={'class': 'form-control'}),
-            'nombres': forms.TextInput(attrs={'class': 'form-control'}),
-            'apellido_paterno': forms.TextInput(attrs={'class': 'form-control'}),
-            'apellido_materno': forms.TextInput(attrs={'class': 'form-control'}),
-            'direccion': forms.TextInput(attrs={'class': 'form-control'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
-            'correo': forms.EmailInput(attrs={'class': 'form-control'}),
             'comuna': forms.Select(attrs={'class': 'form-select'}),
-
-            # Estado se mantiene igual para Motorista.
             'estado': forms.Select(attrs={'class': 'form-select'}),
-
             'incluye_moto_personal': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'licencia_conducir': forms.FileInput(attrs={'class': 'form-control'}),
             'fecha_nacimiento': NativeDateInput(),
             'fecha_ultimo_control': NativeDateInput(),
             'fecha_proximo_control': NativeDateInput(),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        self.fields['comuna'].queryset = Comuna.objects.none()
-
-        if 'region' in self.data:
-            try:
-                region_id = int(self.data.get('region'))
-                self.fields['provincia'].queryset = Provincia.objects.filter(region_id=region_id)
-            except:
-                pass
-        
-        if 'provincia' in self.data:
-            try:
-                provincia_id = int(self.data.get('provincia'))
-                self.fields['comuna'].queryset = Comuna.objects.filter(provincia_id=provincia_id)
-            except:
-                pass
-
-        if self.instance.pk and self.instance.comuna:
-            self.fields['comuna'].queryset = Comuna.objects.filter(provincia=self.instance.comuna.provincia)
-            self.fields['provincia'].queryset = Provincia.objects.filter(region=self.instance.comuna.provincia.region)
-            
-            self.initial['comuna'] = self.instance.comuna
-            self.initial['provincia'] = self.instance.comuna.provincia
-            self.initial['region'] = self.instance.comuna.provincia.region
 
 class MotoForm(forms.ModelForm):
     class Meta:
@@ -432,18 +420,13 @@ class AsignacionFarmaciaForm(forms.ModelForm):
 class AsignacionMotoForm(forms.ModelForm):
     class Meta:
         model = AsignacionMoto
-        fields = ['motorista', 'estado', 'fechaTermino']
+        fields = ['motorista', 'fechaTermino']
         widgets = {
             'motorista': forms.Select(attrs={'class': 'form-control'}),
-            'estado': forms.Select(attrs={'class': 'form-control'}),
             'fechaTermino': forms.DateInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'date'
-                }
+                attrs={'class': 'form-control', 'type': 'date'}
             ),
         }
-
     
 class LoginForm(forms.Form):
     credencial = forms.CharField(

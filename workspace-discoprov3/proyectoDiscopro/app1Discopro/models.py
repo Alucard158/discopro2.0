@@ -95,6 +95,17 @@ class Motorista(models.Model):
         return f"{self.nombres} {self.apellido_paterno}"
     def get_absolute_url(self): 
         return reverse('detalle_motorista', kwargs={'pk': self.pk})
+    def farmacia_actual(self):
+        asignacion = (
+            AsignacionFarmacia.objects
+            .filter(
+                motorista=self,
+                fechaTermino__isnull=True
+            )
+            .order_by('-fechaAsignacion')
+            .first()
+        )
+        return asignacion.farmacia if asignacion else None
 
 class Moto(models.Model):
     PROPIETARIO_EMPRESA = 'Empresa'
@@ -193,15 +204,24 @@ class AsignacionFarmacia(models.Model):
         return f"{self.motorista} asignado a {self.farmacia}"
 
 class AsignacionMoto(models.Model):
+    ESTADO_ASIGNADA = 'ASIGNADA'
+    ESTADO_FINALIZADA = 'FINALIZADA'
+
+    ESTADO_CHOICES = [
+        (ESTADO_ASIGNADA, 'Asignada'),
+        (ESTADO_FINALIZADA, 'Finalizada'),
+    ]
+
     idAsignacionMoto = models.AutoField(primary_key=True)
     motorista = models.ForeignKey(Motorista, on_delete=models.SET_NULL, null=True, blank=True)
     moto = models.ForeignKey(Moto, on_delete=models.CASCADE)
     fechaAsignacion = models.DateTimeField(default=timezone.now)
-    estado = models.CharField(max_length=50, default="Asignada")
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default=ESTADO_ASIGNADA
+    )
     fechaTermino = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.moto} asignada a {self.motorista}"
 
 # --- 5. ¡NUEVOS MODELOS DE MOVIMIENTOS! ---
 

@@ -84,7 +84,7 @@ urlpatterns = [
     path('motos/<str:pk>/', views.MotoDetailView.as_view(), name='moto_detalle'),
 
     # Documentación y mantenimiento
-    path('motos/<str:pk>/documentacion/', views.DocumentacionMotoUpdateView.as_view(), name='documentacion_moto'),
+path('motos/<str:pk>/documentacion/', views.DocumentacionMotoView.as_view(), name='documentacion_moto'),
     path('motos/<str:pk>/mantenimiento/', views.MantenimientoCreateView.as_view(), name='mantenimiento_moto'),
 
     # ---------------------------

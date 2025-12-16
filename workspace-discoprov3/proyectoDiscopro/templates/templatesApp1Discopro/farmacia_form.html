@@ -21,13 +21,24 @@
 <div class="card shadow-sm">
     <div class="card-body">
 
+        <!-- ===== ERRORES REALES DEL FORM ===== -->
         {% if form.errors %}
         <div class="alert alert-danger">
-            Por favor corrige los errores en el formulario.
+            <strong>Errores en el formulario:</strong>
+            <ul class="mb-0">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><b>{{ field.label }}:</b> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
         </div>
         {% endif %}
 
-        <form method="POST">
+        <form method="post">
             {% csrf_token %}
 
             <!-- INFORMACIÓN GENERAL -->
@@ -48,7 +59,6 @@
 
                 <!-- UBICACIÓN -->
                 <div class="row mb-3">
-
                     <div class="col-md-4">
                         <label class="form-label">Región *</label>
                         {{ form.region }}
@@ -63,7 +73,6 @@
                         <label class="form-label">Comuna *</label>
                         {{ form.comuna }}
                     </div>
-
                 </div>
             </fieldset>
 
@@ -152,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
-    // EVENTOS
     if (region) {
         region.addEventListener("change", () => {
             if (region.value) {

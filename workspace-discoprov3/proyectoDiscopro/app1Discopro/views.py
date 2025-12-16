@@ -1,19 +1,18 @@
 # =======================================================
 # IMPORTS GENERALES
 # =======================================================
-from django import forms
-from django.db.models import Count, Q, Subquery, OuterRef
-from django.db.models.functions import Length
+from django.db.models import Count, Q
 from django.views import View
+from datetime import datetime, time
+from django.db.models.functions import ExtractMonth, ExtractYear
 from django.views.generic import (
     TemplateView, ListView, DetailView,
     CreateView, UpdateView, DeleteView
 )
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.http import HttpRequest, JsonResponse
+from django.http import JsonResponse
 from django.utils import timezone
-from datetime import timedelta
 from collections import defaultdict
 
 # Mensajes
@@ -105,43 +104,60 @@ class ReporteMovimientosView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ahora = timezone.localtime()
 
-        inicio_dia = ahora.replace(hour=0, minute=0, second=0, microsecond=0)
-        inicio_mes = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        inicio_anio = ahora.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        hoy = timezone.localdate()
 
-        # Diario
-        qs_hoy = Movimiento.objects.filter(fecha_movimiento__date=ahora.date())
+        inicio_dia = timezone.make_aware(datetime.combine(hoy, time.min))
+        fin_dia = timezone.make_aware(datetime.combine(hoy, time.max))
+
+        inicio_mes = timezone.make_aware(datetime.combine(hoy.replace(day=1), time.min))
+
+        # =========================
+        # 📊 DESPACHOS DEL DÍA (PADRES)
+        # =========================
+        qs_hoy = Movimiento.objects.filter(
+            movimiento_padre__isnull=True,
+            fecha_movimiento__range=(inicio_dia, fin_dia)
+        )
+
         context['total_hoy'] = qs_hoy.count()
         context['estados_hoy'] = qs_hoy.values('estado').annotate(total=Count('estado'))
 
-        # Mensual
-        qs_mes = Movimiento.objects.filter(fecha_movimiento__gte=inicio_mes)
-        context['total_mes'] = qs_mes.count()
-        context['tipos_mes'] = qs_mes.values('tipo_movimiento__nombre').annotate(total=Count('tipo_movimiento'))
+        # =========================
+        # 📊 DESPACHOS DEL MES (PADRES)
+        # =========================
+        qs_mes = Movimiento.objects.filter(
+            movimiento_padre__isnull=True,
+            fecha_movimiento__gte=inicio_mes
+        )
 
-        # Anual
+        context['total_mes'] = qs_mes.count()
+        context['tipos_mes'] = qs_mes.values(
+            'tipo_movimiento__nombre'
+        ).annotate(total=Count('tipo_movimiento'))
+
+        # =========================
+        # 📊 DESPACHOS COMPLETADOS DEL AÑO (PADRES)
+        # =========================
         qs_anio = Movimiento.objects.filter(
-            fecha_movimiento__gte=inicio_anio,
+            movimiento_padre__isnull=True,
             estado='completado'
         )
 
         context['total_anio'] = qs_anio.count()
 
-        datos_agrupados = defaultdict(int)
-        for mov in qs_anio:
-            fecha = timezone.localtime(mov.fecha_movimiento)
-            mes_key = fecha.replace(day=1)
-            datos_agrupados[mes_key] += 1
-
-        context['evolucion_anual'] = sorted(
-            [{'mes': k, 'total': v} for k, v in datos_agrupados.items()],
-            key=lambda x: x['mes']
+        context['evolucion_anual'] = (
+            qs_anio
+            .annotate(
+                anio=ExtractYear('fecha_movimiento'),
+                mes=ExtractMonth('fecha_movimiento')
+            )
+            .values('anio', 'mes')
+            .annotate(total=Count('id_movimiento'))
+            .order_by('anio', 'mes')
         )
 
         return context
-
 
 class ExportarReportePDFView(LoginRequiredMixin, View):
     def get(self, request):
@@ -396,30 +412,34 @@ class MotoristaListView(LoginRequiredMixin, ListView):
         if not q:
             return qs
 
-        q = q.lower().strip()
+        q = q.strip().lower()
+        palabras = q.split()
 
-        # 🔍 Filtro especial para estado
+        # filtros especiales por estado
         if q in ["activo", "activos"]:
             return qs.filter(estado="activo")
 
         if q in ["inactivo", "inactivos"]:
             return qs.filter(estado="inactivo")
 
-        if q in ["licencia", "con licencia", "licencia medica", "licencia médica"]:
+        if q in ["licencia", "licencia médica", "licencia medica"]:
             return qs.filter(estado="licencia")
 
-        # 🔍 Búsqueda general
-        return qs.filter(
-            Q(nombres__icontains=q) |
-            Q(apellido_paterno__icontains=q) |
-            Q(apellido_materno__icontains=q) |
-            Q(rut__icontains=q) |
-            Q(telefono__icontains=q) |
-            Q(correo__icontains=q) |
-            Q(comuna__nombreComuna__icontains=q) |
-            Q(comuna__provincia__nombreProvincia__icontains=q) |
-            Q(comuna__provincia__region__nombreRegion__icontains=q)
-        ).distinct()
+        # búsqueda compuesta (nombre completo, apellidos, etc.)
+        for palabra in palabras:
+            qs = qs.filter(
+                Q(nombres__icontains=palabra) |
+                Q(apellido_paterno__icontains=palabra) |
+                Q(apellido_materno__icontains=palabra) |
+                Q(rut__icontains=palabra) |
+                Q(telefono__icontains=palabra) |
+                Q(correo__icontains=palabra) |
+                Q(comuna__nombreComuna__icontains=palabra) |
+                Q(comuna__provincia__nombreProvincia__icontains=palabra) |
+                Q(comuna__provincia__region__nombreRegion__icontains=palabra)
+            )
+
+        return qs.distinct()
 
 class MotoristaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Motorista
@@ -536,7 +556,19 @@ class AsignacionFarmaciaCreateView(LoginRequiredMixin, SuccessMessageMixin, Crea
         return ctx
 
     def form_valid(self, form):
-        form.instance.motorista = get_object_or_404(Motorista, pk=self.kwargs['motorista_pk'])
+        motorista = get_object_or_404(Motorista, pk=self.kwargs['motorista_pk'])
+
+        # 🔴 cerrar asignación activa anterior (si existe)
+        AsignacionFarmacia.objects.filter(
+            motorista=motorista,
+            fechaTermino__isnull=True
+        ).update(fechaTermino=timezone.localdate())
+
+        # 🟢 crear nueva asignación ACTIVA
+        form.instance.motorista = motorista
+        form.instance.fechaAsignacion = timezone.now()
+        form.instance.fechaTermino = None
+
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -558,8 +590,7 @@ class AsignacionMotoCreateView(CreateView):
         return ctx
 
     def form_valid(self, form):
-
-        # 1) Cerrar asignación previa si está activa
+        # 1️⃣ Cerrar asignación activa anterior
         asignacion_previa = AsignacionMoto.objects.filter(
             moto=self.moto,
             fechaTermino__isnull=True
@@ -567,14 +598,14 @@ class AsignacionMotoCreateView(CreateView):
 
         if asignacion_previa:
             asignacion_previa.fechaTermino = timezone.localdate()
+            asignacion_previa.estado = AsignacionMoto.ESTADO_FINALIZADA
             asignacion_previa.save()
 
-        # 2) Crear nueva asignación
+        # 2️⃣ Crear nueva asignación ACTIVA
         form.instance.moto = self.moto
         form.instance.fechaAsignacion = timezone.now()
-
-        # (OPCIONAL) si el usuario deja fechaTermino en blanco, Django lo guarda como NULL
-        # No hay que tocar nada más
+        form.instance.estado = AsignacionMoto.ESTADO_ASIGNADA
+        form.instance.fechaTermino = None   # 🔥 ESTA LÍNEA ES LA CLAVE
 
         return super().form_valid(form)
 
@@ -585,22 +616,28 @@ class AsignacionMotoCreateView(CreateView):
 # DOCUMENTACIÓN Y MANTENIMIENTO DE MOTOS
 # =======================================================
 
-class DocumentacionMotoUpdateView(LoginRequiredMixin, UpdateView):
+class DocumentacionMotoView(LoginRequiredMixin, UpdateView):
     model = DocumentacionMoto
     form_class = DocumentacionMotoForm
     template_name = 'templatesApp1Discopro/documentacion_moto_form.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.moto = get_object_or_404(Moto, patente=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
     def get_object(self, queryset=None):
-        return get_object_or_404(DocumentacionMoto, moto__patente=self.kwargs['pk'])
+        obj, created = DocumentacionMoto.objects.get_or_create(
+            moto=self.moto
+        )
+        return obj
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['moto'] = self.get_object().moto
+        ctx['moto'] = self.moto
         return ctx
 
     def get_success_url(self):
-        return reverse('moto_detalle', kwargs={'pk': self.get_object().moto.patente})
-
+        return reverse('moto_detalle', kwargs={'pk': self.moto.patente})
 
 class MantenimientoCreateView(LoginRequiredMixin, CreateView):
     model = Mantenimiento  # 👈 ESTE ES TU MODELO REAL
@@ -672,22 +709,30 @@ class MovimientoListView(LoginRequiredMixin, ListView):
 
         q = self.request.GET.get("q")
 
-        if q:
+        if not q:
+            return qs
+
+        q = q.strip().lower()
+        palabras = q.split()
+
+        for palabra in palabras:
             qs = qs.filter(
-                Q(numero_despacho__icontains=q) |
-                Q(origen__icontains=q) |
-                Q(destino__icontains=q) |
-                Q(estado__icontains=q) |
-                Q(motorista_asignado__nombres__icontains=q)
+                Q(numero_despacho__icontains=palabra) |
+                Q(origen__icontains=palabra) |
+                Q(destino__icontains=palabra) |
+                Q(estado__icontains=palabra) |
+                Q(tipo_movimiento__nombre__icontains=palabra) |
+                Q(motorista_asignado__nombres__icontains=palabra) |
+                Q(motorista_asignado__apellido_paterno__icontains=palabra) |
+                Q(motorista_asignado__apellido_materno__icontains=palabra)
             )
 
-        return qs
+        return qs.distinct()
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["q"] = self.request.GET.get("q", "")
         return ctx
-
 
 class MovimientoDetailView(LoginRequiredMixin, DetailView):
     model = Movimiento
@@ -746,11 +791,15 @@ class TramoCreateView(CreateView):
     def form_valid(self, form):
         # Asignar siempre el movimiento padre
         form.instance.movimiento_padre = self.movimiento_padre
-        
-        # Los tramos NO deben tener numero_despacho porque sería duplicado
+
+        # Los tramos NO tienen número de despacho
         form.instance.numero_despacho = None
 
+        # 🔥 OPCIÓN A: heredar el motorista del despacho padre
+        form.instance.motorista_asignado = self.movimiento_padre.motorista_asignado
+
         return super().form_valid(form)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
