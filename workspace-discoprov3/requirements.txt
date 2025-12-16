@@ -1,5 +1,0 @@
-Django==5.2.8
-mysqlclient
-python-decouple
-weasyprint
-Pillow

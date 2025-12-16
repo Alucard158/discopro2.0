@@ -37,8 +37,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 # cast=Csv() convierte "host1,host2" en ['host1', 'host2'] automáticamente
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -133,10 +132,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Directorios donde Django buscará archivos estáticos adicionales (ej: tus CSS globales)
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+if DEBUG:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Directorio donde se recopilarán los estáticos en producción (comando collectstatic)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -150,7 +150,7 @@ AUTH_USER_MODEL = 'app1Discopro.Usuario'
 
 # Redirecciones tras login/logout
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'index'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'login'
 
 AUTHENTICATION_BACKENDS = [

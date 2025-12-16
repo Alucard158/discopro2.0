@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: discopro
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn proyectoDiscopro.wsgi:application
